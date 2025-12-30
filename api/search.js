@@ -17,7 +17,8 @@ export default async function handler(req, res) {
   try {
     const { query, apiKey } = req.body;
 
-    const key = apiKey || process.env.REACT_APP_SERPAPI_KEY;
+    const key =
+      apiKey || process.env.SERPAPI_KEY || process.env.REACT_APP_SERPAPI_KEY;
 
     if (!key) {
       return res.status(400).json({ error: "API key is required" });
@@ -31,14 +32,20 @@ export default async function handler(req, res) {
       api_key: key,
     });
 
-    const response = await fetch(`https://serpapi.com/search.json?${params}`);
+    const url = `https://serpapi.com/search.json?${params}`;
+    console.log("SerpAPI URL:", url);
+
+    const response = await fetch(url);
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error("SerpAPI error:", response.status, errorText);
       return res.status(response.status).json({ error: errorText });
     }
 
     const data = await response.json();
+    console.log("SerpAPI response keys:", Object.keys(data));
+    console.log("local_results count:", data.local_results?.length || 0);
 
     // Filter businesses without websites
     const noWebsiteBusinesses = (data.local_results || [])

@@ -1,4 +1,6 @@
 export async function searchBusinesses(query, apiKey) {
+  console.log("Searching for:", query);
+
   const response = await fetch("/api/search", {
     method: "POST",
     headers: {
@@ -7,12 +9,18 @@ export async function searchBusinesses(query, apiKey) {
     body: JSON.stringify({ query, apiKey }),
   });
 
+  console.log("API response status:", response.status);
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+    console.error("API error:", errorData);
     throw new Error(errorData.error || "Search failed");
   }
 
-  return await response.json();
+  const data = await response.json();
+  console.log("Search results:", data);
+
+  return data;
 }
 
 export function generateMockResults(query) {
