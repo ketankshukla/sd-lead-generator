@@ -1,43 +1,18 @@
 export async function searchBusinesses(query, apiKey) {
-  const params = new URLSearchParams({
-    engine: "google_maps",
-    q: query,
-    ll: "@32.7157,-117.1611,12z",
-    type: "search",
-    api_key: apiKey,
+  const response = await fetch("/api/search", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, apiKey }),
   });
 
-  const response = await fetch(`https://serpapi.com/search.json?${params}`);
-
   if (!response.ok) {
-    throw new Error("Search failed");
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Search failed");
   }
 
-  const data = await response.json();
-
-  const noWebsiteBusinesses = (data.local_results || [])
-    .filter((biz) => !biz.website && !biz.links?.website)
-    .map((biz) => ({
-      name: biz.title,
-      address: biz.address,
-      phone: biz.phone,
-      category: biz.type,
-      rating: biz.rating,
-      review_count: biz.reviews,
-      place_id: biz.place_id,
-      latitude: biz.gps_coordinates?.latitude,
-      longitude: biz.gps_coordinates?.longitude,
-      city: "San Diego",
-      state: "CA",
-      search_query: query,
-      source: "serpapi",
-    }));
-
-  return {
-    results: noWebsiteBusinesses,
-    totalResults: data.local_results?.length || 0,
-    noWebsiteCount: noWebsiteBusinesses.length,
-  };
+  return await response.json();
 }
 
 export function generateMockResults(query) {
