@@ -1,12 +1,12 @@
-export async function searchBusinesses(query, apiKey) {
-  console.log("Searching for:", query);
+export async function searchBusinesses(query, apiKey, location = null) {
+  console.log("Searching for:", query, "at location:", location);
 
   const response = await fetch("/api/search", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ query, apiKey }),
+    body: JSON.stringify({ query, apiKey, location }),
   });
 
   console.log("API response status:", response.status);

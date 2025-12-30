@@ -42,8 +42,8 @@ function App() {
   }, [leads]);
 
   const handleSearch = useCallback(
-    async (category, area, useMock) => {
-      await search(category, area, apiKey, useMock);
+    async (category, city, useMock, location) => {
+      await search(category, city, apiKey, useMock, location);
     },
     [search, apiKey]
   );

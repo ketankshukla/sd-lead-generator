@@ -1,20 +1,49 @@
-import React, { useState } from "react";
-import { Search, MapPin, Briefcase, Sparkles, AlertCircle } from "lucide-react";
-import { BUSINESS_CATEGORIES, SAN_DIEGO_AREAS } from "../utils/constants";
+import React, { useState, useMemo } from "react";
+import {
+  Search,
+  MapPin,
+  Briefcase,
+  Sparkles,
+  AlertCircle,
+  TrendingDown,
+} from "lucide-react";
+import { BUSINESS_CATEGORIES, LOCATIONS, STATES } from "../utils/constants";
 import LoadingSpinner from "./LoadingSpinner";
 
 export default function SearchPanel({ onSearch, loading, error, apiKey }) {
   const [category, setCategory] = useState("");
-  const [area, setArea] = useState("All San Diego");
+  const [selectedState, setSelectedState] = useState("WV");
+  const [selectedCity, setSelectedCity] = useState("Charleston, WV");
   const [useMock, setUseMock] = useState(!apiKey);
+
+  // Get cities for selected state
+  const citiesForState = useMemo(() => {
+    return Object.entries(LOCATIONS)
+      .filter(([_, data]) => data.state === selectedState)
+      .map(([city]) => city);
+  }, [selectedState]);
+
+  // Update selected city when state changes
+  const handleStateChange = (stateCode) => {
+    setSelectedState(stateCode);
+    const firstCity = Object.entries(LOCATIONS).find(
+      ([_, data]) => data.state === stateCode
+    );
+    if (firstCity) {
+      setSelectedCity(firstCity[0]);
+    }
+  };
 
   const handleSearch = () => {
     if (!category) {
       alert("Please select a business category");
       return;
     }
-    onSearch(category, area, useMock);
+    const location = LOCATIONS[selectedCity];
+    onSearch(category, selectedCity, useMock, location);
   };
+
+  const currentState = STATES.find((s) => s.code === selectedState);
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-xl shadow-black/20">
@@ -49,23 +78,49 @@ export default function SearchPanel({ onSearch, loading, error, apiKey }) {
 
         <div>
           <label className="flex items-center gap-2 text-sm text-slate-400 mb-2">
-            <MapPin className="w-4 h-4" />
-            San Diego Area
+            <TrendingDown className="w-4 h-4" />
+            State (Ranked by Low Website Adoption)
           </label>
           <select
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
+            value={selectedState}
+            onChange={(e) => handleStateChange(e.target.value)}
             className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100
                        focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none
                        transition-all duration-200"
           >
-            {SAN_DIEGO_AREAS.map((a) => (
-              <option key={a} value={a}>
-                {a}
+            {STATES.map((state) => (
+              <option key={state.code} value={state.code}>
+                #{state.rank} - {state.name}
               </option>
             ))}
           </select>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <label className="flex items-center gap-2 text-sm text-slate-400 mb-2">
+          <MapPin className="w-4 h-4" />
+          City
+        </label>
+        <select
+          value={selectedCity}
+          onChange={(e) => setSelectedCity(e.target.value)}
+          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100
+                     focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none
+                     transition-all duration-200"
+        >
+          {citiesForState.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
+        {currentState && currentState.rank <= 10 && (
+          <p className="mt-2 text-xs text-emerald-400 flex items-center gap-1">
+            ✨ {currentState.name} is ranked #{currentState.rank} for lowest
+            website adoption - great for finding leads!
+          </p>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-4 mb-6">

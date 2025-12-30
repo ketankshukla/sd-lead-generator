@@ -11,21 +11,21 @@ export function useSearch() {
   const [searchStats, setSearchStats] = useState({ total: 0, noWebsite: 0 });
 
   const search = useCallback(
-    async (category, area, apiKey, useMock = false) => {
+    async (category, city, apiKey, useMock = false, location = null) => {
       try {
         setLoading(true);
         setError(null);
         setResults([]);
 
-        const query = generateSearchQuery(category, area);
-        setLastSearch({ category, area, query });
+        const query = `${category} in ${city}`;
+        setLastSearch({ category, city, query });
 
         let searchResult;
 
         if (useMock || !apiKey) {
           searchResult = generateMockResults(query);
         } else {
-          searchResult = await searchBusinesses(query, apiKey);
+          searchResult = await searchBusinesses(query, apiKey, location);
         }
 
         setResults(searchResult.results);
@@ -38,7 +38,7 @@ export function useSearch() {
           await searchHistoryApi.create({
             query,
             category,
-            area,
+            area: city,
             results_count: searchResult.totalResults,
             leads_found: searchResult.noWebsiteCount,
           });
