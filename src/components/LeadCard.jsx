@@ -7,12 +7,15 @@ import {
   Plus,
   Check,
   ExternalLink,
+  FileText,
+  Clock,
 } from "lucide-react";
 import { formatPhone } from "../utils/helpers";
 
 export default function LeadCard({
   lead,
   onSave,
+  onViewProfile,
   isSaved = false,
   saving = false,
 }) {
@@ -64,6 +67,19 @@ export default function LeadCard({
             </span>
           </div>
         )}
+
+        {lead.description && (
+          <div className="text-sm text-slate-400 italic line-clamp-2 mt-2 p-2 bg-slate-700/30 rounded">
+            "{lead.description}"
+          </div>
+        )}
+
+        {lead.operating_hours && (
+          <div className="flex items-center gap-2 text-sm text-slate-400">
+            <Clock className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+            <span>{lead.hours || "Hours available"}</span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
@@ -92,6 +108,14 @@ export default function LeadCard({
               Save Lead
             </>
           )}
+        </button>
+
+        <button
+          onClick={() => onViewProfile && onViewProfile(lead)}
+          className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-slate-700 rounded-lg transition-all"
+          title="View Full Profile"
+        >
+          <FileText className="w-4 h-4" />
         </button>
 
         {lead.place_id && (

@@ -54,25 +54,56 @@ export default async function handler(req, res) {
     console.log("SerpAPI response keys:", Object.keys(data));
     console.log("local_results count:", data.local_results?.length || 0);
 
-    // Filter businesses without websites
+    // Filter businesses without websites and capture ALL available data
     const noWebsiteBusinesses = (data.local_results || [])
       .filter((biz) => !biz.website && !biz.links?.website)
       .map((biz) => ({
+        // Basic Info
         name: biz.title,
         address: biz.address,
         phone: biz.phone,
+        place_id: biz.place_id,
+
+        // Description & Categories
+        description: biz.description || null,
         category: biz.type,
+        categories: biz.types || [biz.type].filter(Boolean),
+
+        // Ratings & Reviews
         rating: biz.rating,
         review_count: biz.reviews,
-        place_id: biz.place_id,
+        price_level: biz.price || null,
+
+        // Hours & Status
+        hours: biz.hours || null,
+        operating_hours: biz.operating_hours || null,
+        open_state: biz.open_state || null,
+
+        // Services
+        service_options: biz.service_options || null,
+
+        // Media
+        thumbnail: biz.thumbnail || null,
+        photos_link: biz.photos_link || null,
+        reviews_link: biz.reviews_link || null,
+
+        // Location
         latitude: biz.gps_coordinates?.latitude,
         longitude: biz.gps_coordinates?.longitude,
         city: location?.state
-          ? query.split(" in ")[1]?.split(",")[0]
+          ? query.split(" in ")[1]?.split(",")[0]?.trim()
           : "Unknown",
         state: location?.state || "Unknown",
+
+        // Metadata
         search_query: query,
         source: "serpapi",
+        data_id: biz.data_id || null,
+
+        // For manual entry later
+        email: null,
+        owner_name: null,
+        notes: null,
       }));
 
     console.log(

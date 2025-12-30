@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Grid3X3, List, Save, CheckCheck } from "lucide-react";
 import LeadCard from "./LeadCard";
+import BusinessProfile from "./BusinessProfile";
 
 export default function ResultsGrid({
   results,
@@ -11,6 +12,15 @@ export default function ResultsGrid({
 }) {
   const [viewMode, setViewMode] = useState("grid");
   const [savingAll, setSavingAll] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState(null);
+
+  const handleViewProfile = (lead) => {
+    setSelectedProfile(lead);
+  };
+
+  const handleCloseProfile = () => {
+    setSelectedProfile(null);
+  };
 
   const handleSaveAll = async () => {
     setSavingAll(true);
@@ -115,10 +125,15 @@ export default function ResultsGrid({
             key={result.place_id || index}
             lead={result}
             onSave={onSaveLead}
+            onViewProfile={handleViewProfile}
             isSaved={savedIds.includes(result.place_id)}
           />
         ))}
       </div>
+
+      {selectedProfile && (
+        <BusinessProfile lead={selectedProfile} onClose={handleCloseProfile} />
+      )}
     </div>
   );
 }
